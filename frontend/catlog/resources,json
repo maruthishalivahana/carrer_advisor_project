@@ -1,0 +1,324 @@
+[
+    {
+        "id": "python_basics",
+        "title": "Python Programming Fundamentals",
+        "type": "course",
+        "stream": "technology",
+        "description": "Learn Python programming from scratch with hands-on exercises",
+        "duration": "6 weeks",
+        "difficulty": "beginner",
+        "skills": [
+            "Python",
+            "Programming",
+            "Problem Solving"
+        ],
+        "provider": "CodeAcademy",
+        "url": "https://www.codecademy.com/learn/learn-python-3",
+        "cost": "free",
+        "certification": true,
+        "rating": 4.6,
+        "prerequisites": []
+    },
+    {
+        "id": "react_development",
+        "title": "React.js Development Course",
+        "type": "course",
+        "stream": "technology",
+        "description": "Master React.js for building modern web applications",
+        "duration": "8 weeks",
+        "difficulty": "intermediate",
+        "skills": [
+            "React",
+            "JavaScript",
+            "Web Development"
+        ],
+        "provider": "freeCodeCamp",
+        "url": "https://www.freecodecamp.org/learn/front-end-development-libraries/",
+        "cost": "free",
+        "certification": true,
+        "rating": 4.8,
+        "prerequisites": [
+            "JavaScript basics",
+            "HTML/CSS"
+        ]
+    },
+    {
+        "id": "data_analysis_excel",
+        "title": "Data Analysis with Excel",
+        "type": "course",
+        "stream": "business",
+        "description": "Learn to analyze data and create reports using Microsoft Excel",
+        "duration": "4 weeks",
+        "difficulty": "beginner",
+        "skills": [
+            "Excel",
+            "Data Analysis",
+            "Reporting"
+        ],
+        "provider": "Coursera",
+        "url": "https://www.coursera.org/learn/excel-data-analysis",
+        "cost": "paid",
+        "certification": true,
+        "rating": 4.5,
+        "prerequisites": [
+            "Basic computer skills"
+        ]
+    },
+    {
+        "id": "ux_design_fundamentals",
+        "title": "UX Design Fundamentals",
+        "type": "course",
+        "stream": "design",
+        "description": "Introduction to user experience design principles and methods",
+        "duration": "5 weeks",
+        "difficulty": "beginner",
+        "skills": [
+            "UX Design",
+            "User Research",
+            "Prototyping"
+        ],
+        "provider": "Coursera",
+        "url": "https://www.coursera.org/learn/ux-design-fundamentals",
+        "cost": "paid",
+        "certification": true,
+        "rating": 4.7,
+        "prerequisites": []
+    },
+    {
+        "id": "digital_marketing_course",
+        "title": "Digital Marketing Certification",
+        "type": "course",
+        "stream": "marketing",
+        "description": "Comprehensive digital marketing course covering all major channels",
+        "duration": "3 months",
+        "difficulty": "intermediate",
+        "skills": [
+            "Digital Marketing",
+            "SEO",
+            "Social Media",
+            "Analytics"
+        ],
+        "provider": "Google",
+        "url": "https://skillshop.exceedlms.com/student/catalog",
+        "cost": "free",
+        "certification": true,
+        "rating": 4.6,
+        "prerequisites": []
+    },
+    {
+        "id": "sql_for_beginners",
+        "title": "SQL for Data Analysis",
+        "type": "course",
+        "stream": "technology",
+        "description": "Learn SQL to query databases and analyze data effectively",
+        "duration": "4 weeks",
+        "difficulty": "beginner",
+        "skills": [
+            "SQL",
+            "Database",
+            "Data Analysis"
+        ],
+        "provider": "Khan Academy",
+        "url": "https://www.khanacademy.org/computing/computer-programming/sql",
+        "cost": "free",
+        "certification": false,
+        "rating": 4.4,
+        "prerequisites": []
+    },
+    {
+        "id": "project_management_basics",
+        "title": "Project Management Fundamentals",
+        "type": "course",
+        "stream": "business",
+        "description": "Learn essential project management skills and methodologies",
+        "duration": "6 weeks",
+        "difficulty": "beginner",
+        "skills": [
+            "Project Management",
+            "Planning",
+            "Leadership"
+        ],
+        "provider": "LinkedIn Learning",
+        "url": "https://www.linkedin.com/learning/project-management-foundations",
+        "cost": "paid",
+        "certification": true,
+        "rating": 4.5,
+        "prerequisites": []
+    },
+    {
+        "id": "machine_learning_intro",
+        "title": "Introduction to Machine Learning",
+        "type": "course",
+        "stream": "technology",
+        "description": "Learn the fundamentals of machine learning and AI",
+        "duration": "10 weeks",
+        "difficulty": "intermediate",
+        "skills": [
+            "Machine Learning",
+            "Python",
+            "Statistics"
+        ],
+        "provider": "Coursera",
+        "url": "https://www.coursera.org/learn/machine-learning",
+        "cost": "paid",
+        "certification": true,
+        "rating": 4.9,
+        "prerequisites": [
+            "Python basics",
+            "Basic mathematics"
+        ]
+    },
+    {
+        "id": "content_writing_course",
+        "title": "Content Writing Masterclass",
+        "type": "course",
+        "stream": "creative",
+        "description": "Master the art of writing compelling content for various platforms",
+        "duration": "5 weeks",
+        "difficulty": "beginner",
+        "skills": [
+            "Content Writing",
+            "Copywriting",
+            "SEO Writing"
+        ],
+        "provider": "Udemy",
+        "url": "https://www.udemy.com/course/content-writing/",
+        "cost": "paid",
+        "certification": true,
+        "rating": 4.3,
+        "prerequisites": []
+    },
+    {
+        "id": "aws_cloud_practitioner",
+        "title": "AWS Cloud Practitioner",
+        "type": "certification",
+        "stream": "technology",
+        "description": "Entry-level AWS certification for cloud fundamentals",
+        "duration": "8 weeks prep",
+        "difficulty": "beginner",
+        "skills": [
+            "AWS",
+            "Cloud Computing",
+            "Architecture"
+        ],
+        "provider": "Amazon Web Services",
+        "url": "https://aws.amazon.com/certification/certified-cloud-practitioner/",
+        "cost": "paid",
+        "certification": true,
+        "rating": 4.7,
+        "prerequisites": []
+    },
+    {
+        "id": "agile_scrum_master",
+        "title": "Agile Scrum Master Certification",
+        "type": "certification",
+        "stream": "business",
+        "description": "Learn Agile methodologies and Scrum framework",
+        "duration": "6 weeks",
+        "difficulty": "intermediate",
+        "skills": [
+            "Agile",
+            "Scrum",
+            "Team Leadership"
+        ],
+        "provider": "Scrum Alliance",
+        "url": "https://www.scrumalliance.org/get-certified/scrum-master-track/certified-scrummaster",
+        "cost": "paid",
+        "certification": true,
+        "rating": 4.6,
+        "prerequisites": [
+            "Project experience preferred"
+        ]
+    },
+    {
+        "id": "google_analytics_cert",
+        "title": "Google Analytics Certification",
+        "type": "certification",
+        "stream": "marketing",
+        "description": "Master Google Analytics for web traffic analysis",
+        "duration": "4 weeks",
+        "difficulty": "intermediate",
+        "skills": [
+            "Google Analytics",
+            "Web Analytics",
+            "Data Interpretation"
+        ],
+        "provider": "Google",
+        "url": "https://skillshop.exceedlms.com/student/catalog/list?category_ids=53-google-analytics-4",
+        "cost": "free",
+        "certification": true,
+        "rating": 4.5,
+        "prerequisites": [
+            "Basic marketing knowledge"
+        ]
+    },
+    {
+        "id": "portfolio_project_webapp",
+        "title": "Build a Full-Stack Web Application",
+        "type": "project",
+        "stream": "technology",
+        "description": "Create a complete web application from front-end to back-end",
+        "duration": "12 weeks",
+        "difficulty": "intermediate",
+        "skills": [
+            "Full-Stack Development",
+            "JavaScript",
+            "Database Design"
+        ],
+        "provider": "Self-guided",
+        "url": "",
+        "cost": "free",
+        "certification": false,
+        "rating": 0,
+        "prerequisites": [
+            "JavaScript",
+            "HTML/CSS",
+            "Basic programming"
+        ]
+    },
+    {
+        "id": "data_visualization_project",
+        "title": "Data Visualization Dashboard",
+        "type": "project",
+        "stream": "technology",
+        "description": "Create an interactive dashboard using data visualization tools",
+        "duration": "6 weeks",
+        "difficulty": "intermediate",
+        "skills": [
+            "Data Visualization",
+            "Python",
+            "Tableau"
+        ],
+        "provider": "Self-guided",
+        "url": "",
+        "cost": "free",
+        "certification": false,
+        "rating": 0,
+        "prerequisites": [
+            "Python basics",
+            "Data analysis skills"
+        ]
+    },
+    {
+        "id": "marketing_campaign_project",
+        "title": "Digital Marketing Campaign",
+        "type": "project",
+        "stream": "marketing",
+        "description": "Plan and execute a complete digital marketing campaign",
+        "duration": "8 weeks",
+        "difficulty": "intermediate",
+        "skills": [
+            "Campaign Management",
+            "Analytics",
+            "Content Creation"
+        ],
+        "provider": "Self-guided",
+        "url": "",
+        "cost": "free",
+        "certification": false,
+        "rating": 0,
+        "prerequisites": [
+            "Digital marketing basics"
+        ]
+    }
+]
