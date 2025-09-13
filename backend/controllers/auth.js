@@ -1,27 +1,109 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const bcrypt = require('bcrypt');
+const { User } = require("../models/user.model");
+const { message } = require('statuses');
+// const { authMiddleware } = ('../middlewares/auth.middleware.js')
 const app = express();
-// this is a controller function to handle user registration
 
-const authController = ('/register', (req, res) => {
-    const { fullname, email, password } = req.body;
-    const user = { id: Date.now(), fullname, email, password };
-    //  we acn use database to store user info
-    res.status(201).json({ message: 'User registered successfully', user });
 
-})
+const register = async (req, res) => {
 
-// this is a controller function to handle user login
+    try {
 
-const login = ('/login', (req, res) => {
+        const { fullname, email, password } = req.body;
+        const isUserRegister = await User.findOne({ email });
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds)
+        if (isUserRegister) {
+            res.status(400).json({
+                message: "user already exits !"
 
-    const { email, password } = req.body;
-    if (email === req.body.email && password === req.body.password) {
-        res.status(200).json({ message: 'Login successful' });
-    } else {
+            })
+        } else {
+            const newUser = new User({
+                fullname,
+                email,
+                password: hashedPassword
+            })
+            await newUser.save();
+            res.status(201).json({
+                message: "user created sucessfully please login!"
+            })
+        }
 
-        res.status(401).json({ message: 'Invalid credentials' });
+    } catch (error) {
+        res.status(400).json({
+            message: "something went wrong " + error.message
+        })
+
     }
+}
+const loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body;
 
-})
+        // Check if user exists
+        const isUserRegister = await User.findOne({ email }).select("+password");
+        if (!isUserRegister) {
+            return res.status(400).json({
+                message: "User not found. Please register first!"
+            });
+        }
 
-module.exports = { authController, login };
+        // Compare password
+        const isMatch = await bcrypt.compare(password, isUserRegister.password);
+        if (!isMatch) {
+            return res.status(400).json({
+                message: "Invalid credentials"
+            });
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: isUserRegister._id, email: isUserRegister.email },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+
+        // Send success response with token
+        res.status(200).json({
+            message: "Login successful!",
+            token,
+            user: {
+                id: isUserRegister._id,
+                fullname: isUserRegister.fullname,
+                email: isUserRegister.email
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error",
+            error: error.message
+        });
+    }
+};
+
+const authMiddleware = (req, res, next) => {
+    const token = req.headers.authorization?.split(" ")[1]; // Bearer <token>
+    if (!token) return res.status(401).json({ message: "No token, authorization denied" });
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded; // attach user info to request
+        next();
+    } catch (err) {
+        res.status(401).json({ message: "Token is not valid" });
+    }
+};
+
+app.get('/profile', authMiddleware, async (req, res) => {
+    const user = await User.findById(req.user.id);
+    res.json({ user });
+});
+
+
+
+
+module.exports = { register, loginUser, authMiddleware };

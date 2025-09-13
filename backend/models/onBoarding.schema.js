@@ -1,5 +1,5 @@
 // models/onboarding.schema.js
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const onboardingSchema = new mongoose.Schema(
     {
@@ -39,10 +39,10 @@ const onboardingSchema = new mongoose.Schema(
         },
         isOnboarded: {
             type: Boolean,
-            default: false,
+            default: {},
         },
     },
     { _id: false } // don’t create separate _id for embedded docs
 );
 
-export default onboardingSchema;
+module.exports = { onboardingSchema };
