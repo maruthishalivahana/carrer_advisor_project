@@ -1,95 +1,98 @@
-const { User } = require("../models/user.model")
-const { AIRoadmap } = require("../models/aiRoadmap.model")
-// const roadmap = async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const { roadmap } = req.body;
-
-//         console.log("Received body:", req.body);  // <-- check here
-
-//         if (!roadmap) {
-//             return res.status(400).json({ error: "roadmap JSON is required" });
-//         }
-
-//         const aiRoadmap = new AIRoadmap({
-//             user: id,
-//             roadmap
-//         });
-
-//         await aiRoadmap.save();
-//         res.status(201).json(aiRoadmap);
-
-//     } catch (err) {
-//         console.error("Error saving roadmap:", err);
-//         res.status(500).json({ error: err.message });
-//     }
-
-
-// }
-
-
+const { User } = require("../models/user.model");
+const { AIRoadmap } = require("../models/aiRoadmap.model");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const generateAIRoadmap = async (req, res) => {
+const generateAIRoadmap = async (id) => {
     try {
-        const { id } = req.params; // userId
-        const user = await User.findById(id);
 
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
+        if (!id) throw new Error("User ID is required");
+        const user = await User.findById(id);
+        if (!user) return "User not found";
+
 
         // Init Gemini client
         const genAI = new GoogleGenerativeAI("AIzaSyCGoifAIBCvrjhxXqT2xJWqswOsfamoZRA");
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        // Prepare prompt
+        // Prompt for JSON roadmap
         const prompt = `
-    Generate a structured 4-week learning roadmap in JSON format.
-    Each week should contain 3 tasks (total 12 tasks).
-    Personalize it using:
-    Interests: ${user.onboarding?.interests?.join(", ")}
-    Skills: ${user.onboarding?.skills?.join(", ")}
-    Goals: ${user.onboarding?.goals?.join(", ")}
-    Strictly return only JSON.
-Do NOT include markdown ticks, explanations, or text before/after.
-Format:
+    Generate a 4-week learning roadmap in JSON.
+    - Each week must contain exactly 3 tasks (total 12 tasks).
+    - Each task should have: "task" (string) and "status" ("pending").
+    - Personalize using:
+      Interests: ${user.onboarding?.interests?.join(", ")}
+      Skills: ${user.onboarding?.skills?.join(", ")}
+      Goals: ${user.onboarding?.goals?.join(", ")}
+    - Return only valid JSON, no markdown, no explanations.
 
-{
-  "week1": [{"task": "..."}],
-  "week2": [{"task": "..."}],
-  "week3": [{"task": "..."}],
-  "week4": [{"task": "..."}]
-}
+    Example format:
+    {
+      "roadmap": {
+        "week1": [
+          { "task": "Learn basics of JavaScript", "status": "pending" },
+          { "task": "Practice 5 coding problems", "status": "pending" },
+          { "task": "Read about DOM manipulation", "status": "pending" }
+        ],
+        "week2": [
+          { "task": "Build a small project", "status": "pending" },
+          { "task": "Learn Git & GitHub basics", "status": "pending" },
+          { "task": "Solve 5 more coding problems", "status": "pending" }
+        ],
+        "week3": [
+          { "task": "Learn Node.js fundamentals", "status": "pending" },
+          { "task": "Build a simple API with Express", "status": "pending" },
+          { "task": "Deploy project to Vercel/Heroku", "status": "pending" }
+        ],
+        "week4": [
+          { "task": "Contribute to open-source", "status": "pending" },
+          { "task": "Create portfolio project", "status": "pending" },
+          { "task": "Prepare for coding interviews", "status": "pending" }
+        ]
+      }
+    }
     `;
 
-        // Call Gemini
+        // Call Gemini API
         const result = await model.generateContent(prompt);
         const text = result.response.text();
 
-        // Parse JSON from Gemini
+        // ✅ Extract JSON only
         let roadmap;
         try {
-            roadmap = JSON.parse(text);
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            roadmap = JSON.parse(jsonMatch[0]);
         } catch (e) {
             console.error("Gemini raw output:", text);
-            return res.status(500).json({ error: "Failed to parse AI roadmap JSON" });
+            return e;
         }
 
-        // Save to MongoDB
         const aiRoadmap = new AIRoadmap({
             user: id,
-            roadmap,
+            roadmap: roadmap.roadmap, // only store roadmap part
         });
 
         await aiRoadmap.save();
 
-        res.status(201).json(aiRoadmap);
+        return aiRoadmap;
+
     } catch (err) {
         console.error("Error generating roadmap:", err);
-        res.status(500).json({ error: err.message });
+        ;
     }
 };
-module.exports = {
-    generateAIRoadmap
+
+
+// GET /api/roadmap/:userId
+const getUserRoadmap = async (req, res) => {
+    try {
+        const roadmap = await AIRoadmap.findOne({ user: req.params.id });
+        if (!roadmap) {
+            return res.status(404).json({ message: "No roadmap found" });
+        }
+        res.json(roadmap);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 }
+
+module.exports = { generateAIRoadmap, getUserRoadmap };

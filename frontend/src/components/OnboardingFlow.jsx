@@ -47,13 +47,10 @@ export function OnboardingFlow({ onComplete }) {
     const [customInput, setCustomInput] = useState('');
     const totalSteps = 6;
     const progress = (step / totalSteps) * 100;
-
-
-
-
     const handleComplete = async () => {
+        const token = localStorage.getItem("token");
         try {
-            const token = localStorage.getItem("token");  // ✅ fetch token from storage
+            // ✅ fetch token from storage
 
             const res = await axios.post("http://localhost:3000/user/onboarding", {
                 age: profile.age,
@@ -74,6 +71,30 @@ export function OnboardingFlow({ onComplete }) {
             console.error("Onboarding failed:", error);
             alert(error.response?.data?.message || "Failed to save onboarding data");
         }
+        const user = JSON.parse(localStorage.getItem("user"));
+        try {
+            const userId = user?._id;  // ✅ use stored _id
+
+            const roadmapRes = await axios.post(
+                `http://localhost:3000/user/${userId}/roadmap`,
+                {}, // no body needed
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            localStorage.setItem("roadmap", JSON.stringify(roadmapRes.data.roadmap));
+            console.log("AI Roadmap generated:", roadmapRes.data);
+
+        } catch (error) {
+            res.json({
+                message: "somthing went wrong " + error
+            })
+
+        }
+        // Save roadmap in localStorage for frontend use
+
     };
     const handleNext = async () => {
         if (step < totalSteps) {

@@ -4,7 +4,7 @@ const connectDB = require('./config/database')
 const { register, loginUser, authMiddleware, logout } = require("./controllers/auth.js")
 const { userdata } = require("./controllers/user.js");
 const { onBoarding } = require("./controllers/onBoarding.js")
-const { generateAIRoadmap } = require("./controllers/roadmap.js")
+const { generateAIRoadmap, getUserRoadmap } = require("./controllers/roadmap.js")
 const cors = require('cors');
 
 
@@ -36,5 +36,6 @@ app.post('/user/onboarding', authMiddleware, onBoarding)
 app.get("/user/me", authMiddleware, userdata)
 app.post("/logout", authMiddleware, logout)
 app.post("/user/:id/roadmap", authMiddleware, generateAIRoadmap)
+app.get('/user/:id/roadmap', authMiddleware, getUserRoadmap)
 
 
