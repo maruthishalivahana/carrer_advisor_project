@@ -32,8 +32,9 @@ const onBoarding = async (req, res) => {
         res.status(200).json({
             message: "Onboarding data saved successfully",
             onboardingCompleted: user.onboarding.isOnboarded,
-            onboarding: user.onboarding,
+            user
         });
+
     } catch (error) {
         res.status(500).json({ message: "Server error", error: error.message });
     }

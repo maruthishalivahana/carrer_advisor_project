@@ -188,8 +188,8 @@ export function CareerRecommendations({ userProfile }) {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2 text-sm font-medium transition ${activeTab === tab.id
-                  ? "bg-black text-white"
-                  : "bg-gray-50 hover:bg-gray-100"
+                ? "bg-black text-white"
+                : "bg-gray-50 hover:bg-gray-100"
                 }`}
             >
               {tab.label}
@@ -260,8 +260,8 @@ export function CareerRecommendations({ userProfile }) {
                       <span
                         key={skill}
                         className={`text-xs px-2 py-0.5 rounded-full border flex items-center gap-1 ${safeSkills.includes(skill)
-                            ? "bg-black text-white"
-                            : "bg-gray-50 text-gray-700"
+                          ? "bg-black text-white"
+                          : "bg-gray-50 text-gray-700"
                           }`}
                       >
                         {safeSkills.includes(skill) && (

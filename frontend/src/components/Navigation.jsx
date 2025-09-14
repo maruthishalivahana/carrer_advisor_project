@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Home,
   MessageCircle,
@@ -11,8 +12,11 @@ import {
   User,
 } from "lucide-react";
 
-export function Navigation({ currentScreen, onScreenChange, userProgress }) {
-  // Ensure safe values even if userProgress is undefined
+export function Navigation({ userProgress }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Safe values
   const xp = Number(userProgress?.xp || 0);
   const level = Number(userProgress?.level || 1);
   const streak = Number(userProgress?.streak || 0);
@@ -24,11 +28,11 @@ export function Navigation({ currentScreen, onScreenChange, userProgress }) {
   const levelProgress = ((xp % 1000) / 1000) * 100;
 
   const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: Home },
-    { id: "chat", label: "AI Chat", icon: MessageCircle },
-    { id: "roadmap", label: "Roadmap", icon: Map },
-    { id: "careers", label: "Careers", icon: Briefcase },
-    { id: "profile", label: "Profile", icon: User },
+    { id: "/dashboard", label: "Dashboard", icon: Home },
+    { id: "/chat", label: "AI Chat", icon: MessageCircle },
+    { id: "/roadmap", label: "Roadmap", icon: Map },
+    { id: "/careers", label: "Careers", icon: Briefcase },
+    { id: "/profile", label: "Profile", icon: User },
   ];
 
   return (
@@ -47,11 +51,12 @@ export function Navigation({ currentScreen, onScreenChange, userProgress }) {
           <div className="flex items-center gap-2">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = currentScreen === item.id;
+              const isActive = location.pathname === item.id;
+
               return (
                 <button
                   key={item.id}
-                  onClick={() => onScreenChange(item.id)}
+                  onClick={() => navigate(item.id)}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition
                     ${isActive
                       ? "bg-black text-white shadow"
@@ -81,7 +86,7 @@ export function Navigation({ currentScreen, onScreenChange, userProgress }) {
               </span>
             </div>
 
-            {/* Level and XP */}
+            {/* Level + Progress */}
             <div className="flex items-center gap-2">
               <div className="text-right text-sm hidden sm:block">
                 <div className="flex items-center gap-1">
@@ -103,7 +108,7 @@ export function Navigation({ currentScreen, onScreenChange, userProgress }) {
               </div>
             </div>
 
-            {/* Mobile Level Display */}
+            {/* Mobile Level */}
             <div className="flex items-center gap-1 sm:hidden">
               <Star className="w-4 h-4 text-purple-500" />
               <span className="text-sm">{level}</span>

@@ -15,8 +15,37 @@ import {
 import { motion } from "framer-motion";
 import { LinearProgress, Box } from "@mui/material";
 import { Navigation } from "./Navigation";
+import { useNavigate } from "react-router-dom";
+import axios from 'axios'
+
+
 
 export function Dashboard({ userProfile = {}, userProgress = {}, onTaskComplete }) {
+
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+
+        try {
+            const token = localStorage.getItem("token");
+
+            // Optional: call backend logout
+            await axios.post("http://localhost:3000/logout", {}, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            // Clear token on client side
+            localStorage.removeItem("token");
+
+            // Redirect to login
+            navigate("/auth");
+        } catch (err) {
+            console.error("Logout error", err);
+            localStorage.removeItem("token");
+            navigate("/auth");
+        }
+    };
+
     // Safe defaults
     const {
         xp = 0,
@@ -75,7 +104,10 @@ export function Dashboard({ userProfile = {}, userProgress = {}, onTaskComplete 
     return (
         <>
             {/* <Navigation currentScreen="dashboard" userProgress={userProgress} /> */}
-
+            <div className="flex items-center flex-row gap-4">
+                <Navigation />
+                <button className="  mt-10 cursor-pointer border p-4 rounded-2xl" onClick={handleLogout}>logout</button>
+            </div>
             <div className="max-w-6xl mx-auto p-6 space-y-6">
                 {/* Welcome Header */}
                 <div className="text-center space-y-2">

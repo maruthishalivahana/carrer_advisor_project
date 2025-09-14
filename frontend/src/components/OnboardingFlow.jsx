@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import axios from "axios";
+import { useNavigate, Navigate } from "react-router-dom";
+// import { Navigation } from './Navigation';
 import {
     Card,
     CardContent,
@@ -30,7 +33,11 @@ const predefinedGoals = [
     'Get promoted', 'Start a business', 'Get certified', 'Build a portfolio'
 ];
 
+
+
 export function OnboardingFlow({ onComplete }) {
+    const navigate = useNavigate();
+
     const [step, setStep] = useState(1);
     const [profile, setProfile] = useState({
         interests: [],
@@ -38,17 +45,45 @@ export function OnboardingFlow({ onComplete }) {
         goals: []
     });
     const [customInput, setCustomInput] = useState('');
-
     const totalSteps = 6;
     const progress = (step / totalSteps) * 100;
 
-    const handleNext = () => {
+
+
+
+    const handleComplete = async () => {
+        try {
+            const token = localStorage.getItem("token");  // ✅ fetch token from storage
+
+            const res = await axios.post("http://localhost:3000/user/onboarding", {
+                age: profile.age,
+                currentRole: profile.currentRole,
+                experience: profile.experience,
+                interests: profile.interests,
+                skills: profile.skills,
+                goals: profile.goals,
+            }, {
+                headers: { Authorization: `Bearer ${token}` }  // ✅ now token is defined
+            });
+
+            // Save updated user
+            localStorage.setItem("user", JSON.stringify(res.data.user));
+            navigate("/dashboard");
+            console.log("Onboarding success:", res.data);
+        } catch (error) {
+            console.error("Onboarding failed:", error);
+            alert(error.response?.data?.message || "Failed to save onboarding data");
+        }
+    };
+    const handleNext = async () => {
         if (step < totalSteps) {
             setStep(step + 1);
         } else {
-            onComplete(profile);
+            // Call backend API when onboarding is complete
+            await handleComplete();
         }
     };
+
 
     const handlePrevious = () => {
         if (step > 1) setStep(step - 1);
@@ -73,7 +108,7 @@ export function OnboardingFlow({ onComplete }) {
 
     const isStepValid = () => {
         switch (step) {
-            case 1: return profile.name && profile.age;
+            case 1: return profile.age;
             case 2: return profile.experience;
             case 3: return (profile.interests?.length || 0) >= 2;
             case 4: return (profile.skills?.length || 0) >= 2;
@@ -130,14 +165,14 @@ export function OnboardingFlow({ onComplete }) {
                                     <Typography variant="h6" align="center" gutterBottom>
                                         Let's get to know you!
                                     </Typography>
-                                    <TextField
+                                    {/* <TextField
                                         fullWidth
                                         label="What's your name?"
                                         margin="normal"
                                         value={profile.name || ''}
                                         onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
                                         sx={{ borderRadius: 2 }}
-                                    />
+                                    /> */}
                                     <TextField
                                         fullWidth
                                         type="number"
@@ -385,9 +420,9 @@ export function OnboardingFlow({ onComplete }) {
                                     <Box display="flex" justifyContent="center" mb={2}>
                                         <Sparkles size={64} color="purple" />
                                     </Box>
-                                    <Typography variant="h5" gutterBottom>
+                                    {/* <Typography variant="h5" gutterBottom>
                                         You're all set, {profile.name}! 🎉
-                                    </Typography>
+                                    </Typography> */}
                                     <Typography color="textSecondary" mb={3}>
                                         Our AI will now analyze your profile and create a personalized career roadmap just for you.
                                     </Typography>

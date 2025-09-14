@@ -1,5 +1,5 @@
 // models/aiRoadmap.model.js
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const aiRoadmapSchema = new mongoose.Schema(
     {
@@ -22,4 +22,4 @@ const aiRoadmapSchema = new mongoose.Schema(
 
 const AIRoadmap = mongoose.model("AIRoadmap", aiRoadmapSchema);
 
-export default AIRoadmap;
+module.exports = { AIRoadmap };

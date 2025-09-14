@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     User,
     Edit3,
@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import axios from "axios";
 
 // Predefined values
 const predefinedInterests = [
@@ -85,6 +86,7 @@ const predefinedGoals = [
 ];
 
 export function UserProfile({
+
     userProfile = {
         name: "",
         age: "",

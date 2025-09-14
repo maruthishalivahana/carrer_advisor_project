@@ -67,16 +67,18 @@ const loginUser = async (req, res) => {
             { expiresIn: "1h" }
         );
 
-        // Send success response with token
+        // Send success response with token and full onboarding info
         res.status(200).json({
             message: "Login successful!",
             token,
             user: {
                 id: isUserRegister._id,
                 fullname: isUserRegister.fullname,
-                email: isUserRegister.email
+                email: isUserRegister.email,
+                onboarding: isUserRegister.onboarding // ✅ this includes isOnboarded + other details
             }
         });
+        navigate("/dashboard");
     } catch (error) {
         res.status(500).json({
             message: "Server error",
@@ -85,7 +87,26 @@ const loginUser = async (req, res) => {
     }
 };
 
+const logout = (req, res) => {
+    try {
+        // Since JWT is stateless, logout just means "forget the token" on client side
+        // You can optionally invalidate the token in DB/Redis if you want a blacklist system
+        res.status(200).json({
+            success: true,
+            message: "Logout successful. Please clear token on client side.",
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Logout failed",
+            error: error.message,
+        });
+    }
+}
+
 const authMiddleware = (req, res, next) => {
+
+
     const token = req.headers.authorization?.split(" ")[1]; // Bearer <token>
     if (!token) return res.status(401).json({ message: "No token, authorization denied" });
 
@@ -98,12 +119,12 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-app.get('/profile', authMiddleware, async (req, res) => {
-    const user = await User.findById(req.user.id);
-    res.json({ user });
-});
+// app.get('/profile', authMiddleware, async (req, res) => {
+//     const user = await User.findById(req.user.id);
+//     res.json({ user });
+// });
 
 
 
 
-module.exports = { register, loginUser, authMiddleware };
+module.exports = { register, loginUser, authMiddleware, logout };

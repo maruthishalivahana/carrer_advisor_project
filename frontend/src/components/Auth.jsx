@@ -2,6 +2,7 @@ import React from 'react'
 import { Sparkles } from "lucide-react";
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function Auth() {
 
@@ -12,11 +13,61 @@ function Auth() {
 
     const navigate = useNavigate();
 
-    const handleAuthAction = (e) => {
+    // function Auth() {
+    //     const [Issignup, setIsSignup] = useState(false);
+    //     const [formData, setFormData] = useState({
+    //         fullname: "",
+    //         email: "",
+    //         password: "",
+    //     });
+
+    // Handle input change
+    // const handleChange = (e) => {
+    //     setFormData({ ...formData, [e.target.name]: e.target.value });
+    // };
+
+
+    const [fullname, setFullname] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const handleAuthAction = async (e) => {
         e.preventDefault();
-        // TODO: add real authentication logic
-        navigate("/onboarding"); // ✅ go to onboarding
+
+        try {
+            if (Issignup) {
+                // --- Signup API ---
+                await axios.post("http://localhost:3000/user/register", {
+                    fullname,
+                    email,
+                    password,
+                });
+
+                alert("Signup successful! Please login.");
+                setIsSignup(false); // switch back to login mode
+                setPassword("");
+            } else {
+                // --- Login API ---
+                const res = await axios.post("http://localhost:3000/user/login", {
+                    email,
+                    password,
+                });
+
+                // Save JWT token
+                localStorage.setItem("token", res.data.token);
+
+                // Redirect based on onboarding status
+                if (res.data.user?.onboarding?.isOnboarded) {
+                    navigate("/dashboard");
+                } else {
+                    navigate("/onboarding");
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            alert(error.response?.data?.message || "Something went wrong");
+        }
     };
+
     return (
         <>
             <div className='auth-container lg:flex items-center lg:mt-10  justify-center border w-full  p-10 gap-4 rounded-lg shadow-lg bg-gray-100 '>
@@ -38,16 +89,22 @@ function Auth() {
                             <>
 
                                 <label htmlFor="name" className=' ml-2 text-gray-600'>Fullname:</label>
-                                <input type="text" name='name' className='  text-[14px] p-2 rounded-lg m-2 border-2 border-gray-300 lg:w-[300px]  focus:outline-0' placeholder='Enter your name:' />
+                                <input type="text" name='name' className='  text-[14px] p-2 rounded-lg m-2 border-2 border-gray-300 lg:w-[300px]  focus:outline-0' placeholder='Enter your name:'
+                                    onChange={(e) => setFullname(e.target.value)} />
                             </>
                         )}
                         <label htmlFor="email" className=' ml-2  text-gray-600'>E-mail:</label>
-                        <input type="email" name='email' className=' p-2  text-[14px] rounded-lg m-2 border-2 border-gray-300 lg:w-[300px]  focus:outline-0' placeholder='Enter your mail:' />
+                        <input type="email" name='email'
+                            className=' p-2  text-[14px] rounded-lg m-2 border-2 border-gray-300 lg:w-[300px]  focus:outline-0'
+                            placeholder='Enter your mail:'
+                            onChange={(e) => setEmail(e.target.value)} />
                         <label htmlFor="password" className=' ml-2 text-gray-600'>Password:</label>
-                        <input type="password" name='password' className=' p-2 text-[14px] rounded-lg m-2 border-2 border-gray-300 lg:w-[300px]  focus:outline-0' placeholder='Enter your password:' />
+                        <input type="password" name='password' className=' p-2 text-[14px] rounded-lg m-2 border-2 border-gray-300 lg:w-[300px]  focus:outline-0' placeholder='Enter your password:'
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
                         {!Issignup && <p className='text-center text-blue-600 underline cursor-pointer m-2'>forgot Password</p>}
                         <button type='button' className=' border-2 border-black text-black p-2 rounded-lg m-2 hover:bg-black hover:text-white hover:transition-shadow cursor-pointer'
-                            onChange={handleOnchange}
+
                             onClick={handleAuthAction}
                         > {Issignup ? "Signup" : "Sign in"}</button>
                         <p className='text-center gap-2'>{Issignup ? "if you have a account" : "if you dont have an account"}

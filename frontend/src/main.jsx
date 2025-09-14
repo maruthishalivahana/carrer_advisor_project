@@ -7,6 +7,6 @@ import Auth from './components/Auth.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
-    {/* <Auth /> */}
+
   </StrictMode>,
 )
