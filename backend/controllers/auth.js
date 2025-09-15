@@ -119,12 +119,5 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-// app.get('/profile', authMiddleware, async (req, res) => {
-//     const user = await User.findById(req.user.id);
-//     res.json({ user });
-// });
-
-
-
 
 module.exports = { register, loginUser, authMiddleware, logout };

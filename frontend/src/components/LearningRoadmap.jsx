@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
     Map,
     Clock,
@@ -21,6 +22,9 @@ import { toast } from "sonner";
 
 export function LearningRoadmap({ userProfile = {}, userProgress = {}, onTaskComplete }) {
     const [selectedWeek, setSelectedWeek] = useState(1);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [tasksByWeek, setTasksByWeek] = useState({});
 
     // Safe defaults
     const completedTasks = Array.isArray(userProgress?.completedTasks)
@@ -28,139 +32,50 @@ export function LearningRoadmap({ userProfile = {}, userProgress = {}, onTaskCom
         : [];
     const streak = Number(userProgress?.streak || 0);
 
-    // Generate personalized tasks
-    const generateTasks = () => {
-        const baseTasks = [
-            {
-                id: "w1-profile-review",
-                title: "Complete Profile Assessment",
-                description: "Review and update your skills, interests, and career goals",
-                duration: "15 min",
-                xp: 100,
-                type: "assessment",
-                difficulty: "beginner",
-                category: "Foundation",
-            },
-            {
-                id: "w1-industry-research",
-                title: `Research ${userProfile?.interests?.[0] || "Tech"} Industry Trends`,
-                description: "Read about current trends and future outlook in your field of interest",
-                duration: "25 min",
-                xp: 150,
-                type: "reading",
-                difficulty: "beginner",
-                category: "Research",
-            },
-            {
-                id: "w1-skill-gap",
-                title: "Identify Skill Gaps",
-                description: "Compare your current skills with job requirements in your target field",
-                duration: "20 min",
-                xp: 120,
-                type: "assessment",
-                difficulty: "beginner",
-                category: "Analysis",
-            },
-            {
-                id: "w2-online-course",
-                title: `Start ${userProfile?.interests?.[0] || "Tech"} Fundamentals Course`,
-                description: "Begin an online course related to your primary interest area",
-                duration: "45 min",
-                xp: 200,
-                type: "video",
-                difficulty: "intermediate",
-                category: "Learning",
-                prerequisites: ["w1-profile-review"],
-            },
-            {
-                id: "w2-practice-project",
-                title: "Mini Project: Portfolio Piece",
-                description: "Create a small project that demonstrates your skills",
-                duration: "90 min",
-                xp: 300,
-                type: "project",
-                difficulty: "intermediate",
-                category: "Practice",
-            },
-            {
-                id: "w2-networking",
-                title: "Connect with 5 Professionals",
-                description: "Reach out to professionals in your field on LinkedIn",
-                duration: "20 min",
-                xp: 150,
-                type: "practice",
-                difficulty: "beginner",
-                category: "Networking",
-            },
-            {
-                id: "w3-advanced-course",
-                title: "Advanced Skills Development",
-                description: "Dive deeper into specialized skills for your career path",
-                duration: "60 min",
-                xp: 250,
-                type: "video",
-                difficulty: "advanced",
-                category: "Learning",
-                prerequisites: ["w2-online-course"],
-            },
-            {
-                id: "w3-portfolio-project",
-                title: "Major Portfolio Project",
-                description: "Build a comprehensive project showcasing multiple skills",
-                duration: "120 min",
-                xp: 400,
-                type: "project",
-                difficulty: "advanced",
-                category: "Portfolio",
-            },
-            {
-                id: "w3-peer-review",
-                title: "Peer Review Session",
-                description: "Share your work with peers and get feedback",
-                duration: "30 min",
-                xp: 180,
-                type: "practice",
-                difficulty: "intermediate",
-                category: "Collaboration",
-            },
-            {
-                id: "w4-job-applications",
-                title: "Apply to Target Opportunities",
-                description: "Submit applications for internships or jobs in your field",
-                duration: "40 min",
-                xp: 300,
-                type: "practice",
-                difficulty: "intermediate",
-                category: "Application",
-            },
-            {
-                id: "w4-interview-prep",
-                title: "Interview Preparation",
-                description: "Practice common interview questions and scenarios",
-                duration: "30 min",
-                xp: 200,
-                type: "practice",
-                difficulty: "intermediate",
-                category: "Interview",
-            },
-            {
-                id: "w4-final-assessment",
-                title: "Skills Assessment",
-                description: "Complete a comprehensive assessment of your progress",
-                duration: "25 min",
-                xp: 250,
-                type: "assessment",
-                difficulty: "intermediate",
-                category: "Evaluation",
-            },
-        ];
+    // Fetch AI Roadmap from backend
+    useEffect(() => {
+        const fetchRoadmap = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const storedUser = JSON.parse(localStorage.getItem("user") || "null");
+                const userId = storedUser?.id || storedUser?._id;
+                if (!userId) throw new Error("Missing user id");
 
-        return baseTasks;
-    };
+                const res = await axios.get(`http://localhost:3000/user/${userId}/roadmap`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
 
-    const tasks = generateTasks();
+                // Response shape: { roadmap: { week1: [{ task, status }], ... }, ... }
+                const backend = res.data?.roadmap || {};
+                const normalized = {};
+                Object.keys(backend).forEach((weekKey) => {
+                    const weekNum = weekKey.replace("week", "");
+                    const weekTasks = (backend[weekKey] || []).map((t, idx) => ({
+                        id: `w${weekNum}-${idx + 1}`,
+                        title: t.task || `Task ${idx + 1}`,
+                        description: "",
+                        duration: "30 min",
+                        xp: 100,
+                        type: "reading",
+                        difficulty: "beginner",
+                        category: "Roadmap",
+                        status: t.status || "pending",
+                    }));
+                    normalized[weekKey] = weekTasks;
+                });
 
-    const getTasksByWeek = (week) => tasks.filter((task) => task.id.startsWith(`w${week}-`));
+                setTasksByWeek(normalized);
+                setLoading(false);
+            } catch (err) {
+                setError(err.response?.data?.message || err.message || "Failed to load roadmap");
+                setLoading(false);
+            }
+        };
+
+        fetchRoadmap();
+    }, []);
+
+    const getTasksByWeek = (week) => tasksByWeek[`week${week}`] || [];
 
     const getWeekProgress = (week) => {
         const weekTasks = getTasksByWeek(week);
@@ -169,8 +84,9 @@ export function LearningRoadmap({ userProfile = {}, userProgress = {}, onTaskCom
     };
 
     const getTotalProgress = () => {
-        const completedCount = tasks.filter((task) => completedTasks.includes(task.id)).length;
-        return tasks.length > 0 ? (completedCount / tasks.length) * 100 : 0;
+        const all = Object.values(tasksByWeek).flat();
+        const completedCount = all.filter((task) => completedTasks.includes(task.id)).length;
+        return all.length > 0 ? (completedCount / all.length) * 100 : 0;
     };
 
     const getTaskIcon = (type) => {
@@ -234,174 +150,183 @@ export function LearningRoadmap({ userProfile = {}, userProgress = {}, onTaskCom
                 </p>
             </div>
 
+            {/* Loading / Error */}
+            {loading && (
+                <div className="border rounded-lg shadow-sm p-4 text-center text-gray-600">Loading roadmap...</div>
+            )}
+            {error && !loading && (
+                <div className="border rounded-lg shadow-sm p-4 text-center text-red-600">{error}</div>
+            )}
+
             {/* Overall Progress */}
-            <div className="border rounded-lg shadow-sm p-4">
-                <div className="flex items-center justify-between mb-3">
-                    <h2 className="font-semibold">Overall Progress</h2>
-                    <span className="px-2 py-1 text-xs rounded-full bg-gray-100 border">
-                        {Math.round(getTotalProgress())}% Complete
-                    </span>
+            {!loading && !error && (
+                <div className="border rounded-lg shadow-sm p-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="font-semibold">Overall Progress</h2>
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 border">
+                            {Math.round(getTotalProgress())}% Complete
+                        </span>
+                    </div>
+                    <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-black transition-all"
+                            style={{ width: `${getTotalProgress()}%` }}
+                        ></div>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-500 mt-2">
+                        <span>{completedTasks.length} tasks completed</span>
+                        <span>{Math.max(Object.values(tasksByWeek).flat().length - completedTasks.length, 0)} tasks remaining</span>
+                    </div>
                 </div>
-                <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                        className="h-full bg-black transition-all"
-                        style={{ width: `${getTotalProgress()}%` }}
-                    ></div>
-                </div>
-                <div className="flex justify-between text-sm text-gray-500 mt-2">
-                    <span>{completedTasks.length} tasks completed</span>
-                    <span>{tasks.length - completedTasks.length} tasks remaining</span>
-                </div>
-            </div>
+            )}
 
             {/* Week Navigation */}
-            <div>
-                <div className="grid grid-cols-4 gap-2 mb-4">
-                    {weeks.map((week) => {
-                        const progress = getWeekProgress(week);
-                        const isActive = selectedWeek === week;
-                        return (
-                            <button
-                                key={week}
-                                onClick={() => setSelectedWeek(week)}
-                                className={`p-2 rounded-lg border text-sm flex flex-col items-center ${isActive ? "border-black bg-gray-100" : "hover:bg-gray-50"
-                                    }`}
-                            >
-                                <span>Week {week}</span>
-                                <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
-                                    <div
-                                        className="bg-purple-600 h-1 rounded-full"
-                                        style={{ width: `${progress}%` }}
-                                    />
-                                </div>
-                                <span className="text-xs">{Math.round(progress)}%</span>
-                            </button>
-                        );
-                    })}
-                </div>
+            {!loading && !error && (
+                <div>
+                    <div className="grid grid-cols-4 gap-2 mb-4">
+                        {weeks.map((week) => {
+                            const progress = getWeekProgress(week);
+                            const isActive = selectedWeek === week;
+                            return (
+                                <button
+                                    key={week}
+                                    onClick={() => setSelectedWeek(week)}
+                                    className={`p-2 rounded-lg border text-sm flex flex-col items-center ${isActive ? "border-black bg-gray-100" : "hover:bg-gray-50"
+                                        }`}
+                                >
+                                    <span>Week {week}</span>
+                                    <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
+                                        <div
+                                            className="bg-purple-600 h-1 rounded-full"
+                                            style={{ width: `${progress}%` }}
+                                        />
+                                    </div>
+                                    <span className="text-xs">{Math.round(progress)}%</span>
+                                </button>
+                            );
+                        })}
+                    </div>
 
-                {/* Week Tasks */}
-                {weeks.map(
-                    (week) =>
-                        selectedWeek === week && (
-                            <div
-                                key={week}
-                                className="border rounded-lg shadow-sm p-4 space-y-4"
-                            >
-                                <div className="flex items-center justify-between mb-2">
-                                    <h3 className="flex items-center gap-2 font-semibold">
-                                        <Calendar className="w-5 h-5" />
-                                        Week {week} Tasks
-                                    </h3>
-                                    <span className="px-2 py-1 text-xs rounded-full bg-gray-100 border">
-                                        {
-                                            getTasksByWeek(week).filter((t) => completedTasks.includes(t.id))
-                                                .length
-                                        }
-                                        /{getTasksByWeek(week).length} Complete
-                                    </span>
-                                </div>
+                    {/* Week Tasks */}
+                    {weeks.map(
+                        (week) =>
+                            selectedWeek === week && (
+                                <div
+                                    key={week}
+                                    className="border rounded-lg shadow-sm p-4 space-y-4"
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="flex items-center gap-2 font-semibold">
+                                            <Calendar className="w-5 h-5" />
+                                            Week {week} Tasks
+                                        </h3>
+                                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 border">
+                                            {getTasksByWeek(week).filter((t) => completedTasks.includes(t.id)).length}
+                                            /{getTasksByWeek(week).length} Complete
+                                        </span>
+                                    </div>
 
-                                <AnimatePresence>
-                                    {getTasksByWeek(week).map((task, index) => {
-                                        const Icon = getTaskIcon(task.type);
-                                        const isCompleted = completedTasks.includes(task.id);
-                                        const canStart =
-                                            !task.prerequisites ||
-                                            task.prerequisites.every((p) => completedTasks.includes(p));
+                                    <AnimatePresence>
+                                        {getTasksByWeek(week).map((task, index) => {
+                                            const Icon = getTaskIcon(task.type);
+                                            const isCompleted = completedTasks.includes(task.id);
+                                            const canStart =
+                                                !task.prerequisites ||
+                                                task.prerequisites.every((p) => completedTasks.includes(p));
 
-                                        return (
-                                            <motion.div
-                                                key={task.id}
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: index * 0.1 }}
-                                                className={`p-4 rounded-lg border transition ${isCompleted
+                                            return (
+                                                <motion.div
+                                                    key={task.id}
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: index * 0.1 }}
+                                                    className={`p-4 rounded-lg border transition ${isCompleted
                                                         ? "bg-green-50 border-green-200"
                                                         : canStart
                                                             ? "hover:border-purple-300"
                                                             : "bg-gray-50 border-gray-200 opacity-60"
-                                                    }`}
-                                            >
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex gap-3 flex-1">
-                                                        <div
-                                                            className={`p-2 rounded-lg ${isCompleted ? "bg-green-100" : "bg-purple-100"
-                                                                }`}
-                                                        >
-                                                            <Icon
-                                                                className={`w-5 h-5 ${isCompleted ? "text-green-600" : "text-purple-600"
+                                                        }`}
+                                                >
+                                                    <div className="flex items-start justify-between">
+                                                        <div className="flex gap-3 flex-1">
+                                                            <div
+                                                                className={`p-2 rounded-lg ${isCompleted ? "bg-green-100" : "bg-purple-100"
                                                                     }`}
-                                                            />
+                                                            >
+                                                                <Icon
+                                                                    className={`w-5 h-5 ${isCompleted ? "text-green-600" : "text-purple-600"
+                                                                        }`}
+                                                                />
+                                                            </div>
+
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center gap-2 mb-1">
+                                                                    <h4 className="font-medium">{task.title}</h4>
+                                                                    <span
+                                                                        className={`px-2 py-0.5 rounded-full border text-xs ${getDifficultyColor(
+                                                                            task.difficulty
+                                                                        )}`}
+                                                                    >
+                                                                        {task.difficulty}
+                                                                    </span>
+                                                                </div>
+
+                                                                <p className="text-sm text-gray-600 mb-2">
+                                                                    {task.description || ""}
+                                                                </p>
+
+                                                                <div className="flex items-center gap-4 flex-wrap">
+                                                                    <span className="px-2 py-0.5 rounded-full bg-gray-100 border text-xs flex items-center gap-1">
+                                                                        <Clock className="w-3 h-3" />
+                                                                        {task.duration}
+                                                                    </span>
+                                                                    <span className="px-2 py-0.5 rounded-full border text-xs flex items-center gap-1">
+                                                                        <Star className="w-3 h-3" />+{task.xp} XP
+                                                                    </span>
+                                                                    <span className="px-2 py-0.5 rounded-full border text-xs">
+                                                                        {task.category}
+                                                                    </span>
+                                                                </div>
+
+                                                                {task.prerequisites?.length > 0 && (
+                                                                    <div className="mt-2 text-xs text-gray-500">
+                                                                        Prerequisites: {task.prerequisites.join(", ")}
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
 
-                                                        <div className="flex-1">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <h4 className="font-medium">{task.title}</h4>
-                                                                <span
-                                                                    className={`px-2 py-0.5 rounded-full border text-xs ${getDifficultyColor(
-                                                                        task.difficulty
-                                                                    )}`}
-                                                                >
-                                                                    {task.difficulty}
-                                                                </span>
-                                                            </div>
-
-                                                            <p className="text-sm text-gray-600 mb-2">
-                                                                {task.description}
-                                                            </p>
-
-                                                            <div className="flex items-center gap-4 flex-wrap">
-                                                                <span className="px-2 py-0.5 rounded-full bg-gray-100 border text-xs flex items-center gap-1">
-                                                                    <Clock className="w-3 h-3" />
-                                                                    {task.duration}
-                                                                </span>
-                                                                <span className="px-2 py-0.5 rounded-full border text-xs flex items-center gap-1">
-                                                                    <Star className="w-3 h-3" />+{task.xp} XP
-                                                                </span>
-                                                                <span className="px-2 py-0.5 rounded-full border text-xs">
-                                                                    {task.category}
-                                                                </span>
-                                                            </div>
-
-                                                            {task.prerequisites?.length > 0 && (
-                                                                <div className="mt-2 text-xs text-gray-500">
-                                                                    Prerequisites: {task.prerequisites.join(", ")}
+                                                        <div className="ml-4">
+                                                            {isCompleted ? (
+                                                                <div className="flex flex-col items-center gap-1">
+                                                                    <CheckCircle2 className="w-8 h-8 text-green-600" />
+                                                                    <span className="px-2 py-0.5 rounded-full bg-gray-100 border text-xs">
+                                                                        +{task.xp} XP
+                                                                    </span>
                                                                 </div>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => handleCompleteTask(task)}
+                                                                    disabled={!canStart}
+                                                                    className={`px-3 py-2 rounded-md text-sm font-medium ${canStart
+                                                                        ? "bg-black text-white hover:bg-gray-800"
+                                                                        : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                                                        }`}
+                                                                >
+                                                                    {canStart ? "Start" : "Locked"}
+                                                                </button>
                                                             )}
                                                         </div>
                                                     </div>
-
-                                                    <div className="ml-4">
-                                                        {isCompleted ? (
-                                                            <div className="flex flex-col items-center gap-1">
-                                                                <CheckCircle2 className="w-8 h-8 text-green-600" />
-                                                                <span className="px-2 py-0.5 rounded-full bg-gray-100 border text-xs">
-                                                                    +{task.xp} XP
-                                                                </span>
-                                                            </div>
-                                                        ) : (
-                                                            <button
-                                                                onClick={() => handleCompleteTask(task)}
-                                                                disabled={!canStart}
-                                                                className={`px-3 py-2 rounded-md text-sm font-medium ${canStart
-                                                                        ? "bg-black text-white hover:bg-gray-800"
-                                                                        : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                                                    }`}
-                                                            >
-                                                                {canStart ? "Start" : "Locked"}
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        );
-                                    })}
-                                </AnimatePresence>
-                            </div>
-                        )
-                )}
-            </div>
+                                                </motion.div>
+                                            );
+                                        })}
+                                    </AnimatePresence>
+                                </div>
+                            )
+                    )}
+                </div>
+            )}
 
             {/* Achievements */}
             <div className="border rounded-lg shadow-sm p-4">

@@ -86,10 +86,10 @@ const predefinedGoals = [
 ];
 
 export function UserProfile({
-
     userProfile = {
         name: "",
         age: "",
+        gender: "",
         currentRole: "",
         experience: "",
         interests: [],
@@ -108,6 +108,42 @@ export function UserProfile({
 }) {
     const [editMode, setEditMode] = useState(false);
     const [editedProfile, setEditedProfile] = useState(userProfile);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    // Fetch user from API and map into local profile shape
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const res = await axios.get("http://localhost:3000/user/me", {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const apiUser = res.data; // { fullname, onboarding: { age, currentRole, experience, interests, skills, goals, gender? } }
+
+                const mappedProfile = {
+                    name: apiUser.fullname || "",
+                    age: apiUser?.onboarding?.age ?? "",
+                    gender: apiUser?.onboarding?.gender ?? "",
+                    currentRole: apiUser?.onboarding?.currentRole || "",
+                    experience: apiUser?.onboarding?.experience || "",
+                    interests: apiUser?.onboarding?.interests || [],
+                    skills: apiUser?.onboarding?.skills || [],
+                    goals: apiUser?.onboarding?.goals || [],
+                };
+
+                setEditedProfile(mappedProfile);
+                setLoading(false);
+            } catch (err) {
+                setError(err.response?.data?.message || "Failed to load user profile");
+                setLoading(false);
+            }
+        };
+
+        fetchUser();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const effectiveProfile = editedProfile;
     const [customInput, setCustomInput] = useState("");
     const [showResetDialog, setShowResetDialog] = useState(false);
     const [activeTab, setActiveTab] = useState("overview");
@@ -128,7 +164,7 @@ export function UserProfile({
         return score;
     }
 
-    const profileCompletionScore = calculateProfileCompletion(userProfile);
+    const profileCompletionScore = calculateProfileCompletion(effectiveProfile);
 
     // Handlers
     const handleSaveProfile = () => {
@@ -138,7 +174,7 @@ export function UserProfile({
     };
 
     const handleCancelEdit = () => {
-        setEditedProfile(userProfile);
+        setEditedProfile(effectiveProfile);
         setEditMode(false);
     };
 
@@ -232,23 +268,31 @@ export function UserProfile({
                 ))}
             </div>
 
+            {/* Loading / Error */}
+            {loading && (
+                <div className="text-center text-gray-500 py-6">Loading profile...</div>
+            )}
+            {error && !loading && (
+                <div className="text-center text-red-600 py-6">{error}</div>
+            )}
+
             {/* Overview Tab */}
-            {activeTab === "overview" && (
+            {activeTab === "overview" && !loading && !error && (
                 <div className="space-y-6">
                     {/* Profile Header */}
                     <div className="bg-white border rounded-xl p-6 shadow-sm">
                         <div className="flex items-start gap-6">
                             <div className="w-20 h-20 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-xl font-bold">
-                                {getInitials(userProfile.name || "U")}
+                                {getInitials(effectiveProfile.name || "U")}
                             </div>
                             <div className="flex-1">
                                 <div className="flex items-start justify-between">
                                     <div>
-                                        <h2 className="text-2xl mb-1">{userProfile.name || "Unnamed"}</h2>
+                                        <h2 className="text-2xl mb-1">{effectiveProfile.name || "Unnamed"}</h2>
                                         <p className="text-gray-500 mb-2">
-                                            {userProfile.currentRole || "Career Explorer"} • {userProfile.age || "?"} years old
+                                            {effectiveProfile.currentRole || "Career Explorer"} • {effectiveProfile.age || "?"} years old{effectiveProfile.gender ? ` • ${effectiveProfile.gender}` : ""}
                                         </p>
-                                        <span className="px-2 py-1 text-xs border rounded">{userProfile.experience || "N/A"}</span>
+                                        <span className="px-2 py-1 text-xs border rounded">{effectiveProfile.experience || "N/A"}</span>
                                     </div>
                                     <button
                                         onClick={() => setEditMode(true)}
