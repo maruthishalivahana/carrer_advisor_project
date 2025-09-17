@@ -68,7 +68,7 @@ const loginUser = async (req, res) => {
         );
 
         // Send success response with token and full onboarding info
-        res.status(200).json({
+        return res.status(200).json({
             message: "Login successful!",
             token,
             user: {
@@ -78,7 +78,6 @@ const loginUser = async (req, res) => {
                 onboarding: isUserRegister.onboarding // ✅ this includes isOnboarded + other details
             }
         });
-        navigate("/dashboard");
     } catch (error) {
         res.status(500).json({
             message: "Server error",

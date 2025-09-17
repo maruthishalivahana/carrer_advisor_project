@@ -130,7 +130,7 @@ export function LearningRoadmap({ userProfile = {}, userProgress = {}, onTaskCom
             }
         }
 
-        onTaskComplete(task.id, task.xp);
+        // onTaskComplete(task.id, task.xp);
         toast.success(`Great job! You earned ${task.xp} XP! 🎉`);
     };
 
