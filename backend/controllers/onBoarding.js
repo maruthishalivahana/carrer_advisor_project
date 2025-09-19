@@ -56,7 +56,6 @@
 
 const express = require('express');
 const { User } = require("../models/user.model");
-const { generateAIRoadmap } = require("./roadmap"); // Make sure to export properly
 
 const onBoarding = async (req, res) => {
     try {
@@ -85,14 +84,10 @@ const onBoarding = async (req, res) => {
 
         await user.save();
 
-        // ✅ Generate AI roadmap automatically
-        // Refactor generateAIRoadmap to accept userId and return roadmap object instead of sending res
-        const aiRoadmap = await generateAIRoadmap(user._id);
-
+        // Roadmap generation is a separate step via POST /user/roadmap
         res.status(200).json({
-            message: "Onboarding and AI roadmap generated successfully",
-            user,
-            roadmap: aiRoadmap
+            message: "Onboarding data saved successfully",
+            user
         });
 
 

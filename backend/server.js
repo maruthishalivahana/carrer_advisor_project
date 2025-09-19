@@ -35,7 +35,31 @@ app.post('/user/login', loginUser)
 app.post('/user/onboarding', authMiddleware, onBoarding)
 app.get("/user/me", authMiddleware, userdata)
 app.post("/logout", authMiddleware, logout)
-app.post("/user/:id/roadmap", authMiddleware, generateAIRoadmap)
-app.get('/user/:id/roadmap', authMiddleware, getUserRoadmap)
+app.post("/user/roadmap", authMiddleware, generateAIRoadmap)
+app.get('/user/roadmap', authMiddleware, getUserRoadmap)
 
 
+app.post("/predict", async (req, res) => {
+    try {
+        const { input_text } = req.body;
+
+        if (!input_text) {
+            return res.status(400).json({ error: "Missing input_text in request body" });
+        }
+
+        const endpoint = `projects/${PROJECT_ID}/locations/${LOCATION}/endpoints/${ENDPOINT_ID}`;
+
+        const request = {
+            endpoint,
+            instances: [{ content: input_text }],
+        };
+
+        console.log("📤 Sending request to Vertex AI:", JSON.stringify(request, null, 2));
+
+        const [response] = await vertexClient.predict(request);
+        res.json({ predictions: response.predictions });
+    } catch (error) {
+        console.error("Prediction error:", error);
+        res.status(500).json({ error: "Prediction failed", details: error.message });
+    }
+});

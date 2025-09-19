@@ -1,1 +1,7 @@
 node_modules/
+# Ignore environment variables file
+.env
+
+# Ignore service account keys
+config/service-account.json
+backend/config/service-account.json

@@ -32,47 +32,102 @@ export function LearningRoadmap({ userProfile = {}, userProgress = {}, onTaskCom
         : [];
     const streak = Number(userProgress?.streak || 0);
 
-    // Fetch AI Roadmap from backend
+    // Fetch AI Roadmap from backend (robust, safe, and well-logged)
     useEffect(() => {
-        const fetchRoadmap = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                const storedUser = JSON.parse(localStorage.getItem("user") || "null");
-                const userId = storedUser?.id || storedUser?._id;
-                if (!userId) throw new Error("Missing user id");
+        let cancelled = false; // prevents state updates after unmount
 
-                const res = await axios.get(`http://localhost:3000/user/${userId}/roadmap`, {
+        const fetchRoadmap = async () => {
+            // Begin loading state for UX feedback
+            if (!cancelled) setLoading(true);
+            if (!cancelled) setError("");
+
+            try {
+                // 1) Safely fetch auth and user info
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    console.warn("[LearningRoadmap] Missing JWT token in localStorage");
+                    if (!cancelled) setError("You are not logged in. Please log in and try again.");
+                    if (!cancelled) setLoading(false);
+                    return;
+                }
+
+                const storedUserRaw = localStorage.getItem("user");
+                let storedUser = null;
+                try {
+                    storedUser = JSON.parse(storedUserRaw || "null");
+                } catch (e) {
+                    console.warn("[LearningRoadmap] Failed to parse stored user from localStorage", e);
+                }
+                const userId = storedUser?.id || storedUser?._id;
+                if (!userId) {
+                    console.warn("[LearningRoadmap] Missing user id in local storage user object", storedUser);
+                    if (!cancelled) setError("Missing user information. Please log in again.");
+                    if (!cancelled) setLoading(false);
+                    return;
+                }
+
+                // 2) Perform API request with Authorization header
+                console.debug("[LearningRoadmap] Fetching roadmap for user", { userId });
+                const response = await axios.get("http://localhost:3000/user/roadmap", {
                     headers: { Authorization: `Bearer ${token}` },
+                    timeout: 30000,
                 });
 
-                // Response shape: { roadmap: { week1: [{ task, status }], ... }, ... }
-                const backend = res.data?.roadmap || {};
+                // 3) Validate and normalize backend payload
+                // Expected: { roadmap: { week1: [{ task, status }], ... } }
+                const backendRoadmap = response?.data?.roadmap;
+                if (!backendRoadmap || typeof backendRoadmap !== "object") {
+                    console.error("[LearningRoadmap] Invalid roadmap payload", response?.data);
+                    throw new Error("Invalid roadmap data received from server");
+                }
+
+
                 const normalized = {};
-                Object.keys(backend).forEach((weekKey) => {
-                    const weekNum = weekKey.replace("week", "");
-                    const weekTasks = (backend[weekKey] || []).map((t, idx) => ({
-                        id: `w${weekNum}-${idx + 1}`,
+                // Convert array -> object with week1, week2 keys
+                backendRoadmap.forEach((weekItem) => {
+                    const weekKey = `week${weekItem.week}`;
+                    normalized[weekKey] = (weekItem.tasks || []).map((t, idx) => ({
+                        id: `${weekKey}-${idx + 1}`,
                         title: t.task || `Task ${idx + 1}`,
-                        description: "",
+                        description: t.description || "",
                         duration: "30 min",
                         xp: 100,
                         type: "reading",
                         difficulty: "beginner",
                         category: "Roadmap",
-                        status: t.status || "pending",
+                        status: t.status === "completed" ? "completed" : "pending",
                     }));
-                    normalized[weekKey] = weekTasks;
                 });
 
                 setTasksByWeek(normalized);
-                setLoading(false);
-            } catch (err) {
-                setError(err.response?.data?.message || err.message || "Failed to load roadmap");
-                setLoading(false);
+
+
+                // 4) Update state
+                if (!cancelled) setTasksByWeek(normalized);
+                if (!cancelled) setLoading(false);
+                console.debug("[LearningRoadmap] Roadmap loaded and normalized", normalized);
+            } catch (error) {
+                // 5) Robust error handling and helpful logs
+                const backendMessage = error?.response?.data?.message || error?.response?.data?.error;
+                const status = error?.response?.status;
+                console.error("[LearningRoadmap] Roadmap fetch failed", {
+                    status,
+                    backendMessage,
+                    errorMessage: error?.message,
+                    stack: error?.stack,
+                });
+                const friendly = backendMessage || error?.message || "Failed to load roadmap";
+                if (!cancelled) setError(friendly);
+                if (!cancelled) setLoading(false);
             }
         };
 
         fetchRoadmap();
+
+        // Cleanup to avoid setting state on unmounted component
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     const getTasksByWeek = (week) => tasksByWeek[`week${week}`] || [];

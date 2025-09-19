@@ -52,7 +52,7 @@ export function OnboardingFlow({ onComplete }) {
         try {
             // ✅ fetch token from storage
 
-            const res = await axios.post("http://localhost:3000/user/onboarding", {
+            const response = await axios.post("http://localhost:3000/user/onboarding", {
                 age: profile.age,
                 currentRole: profile.currentRole,
                 experience: profile.experience,
@@ -64,19 +64,17 @@ export function OnboardingFlow({ onComplete }) {
             });
 
             // Save updated user
-            localStorage.setItem("user", JSON.stringify(res.data.user));
+            localStorage.setItem("user", JSON.stringify(response.data.user));
             navigate("/dashboard");
-            console.log("Onboarding success:", res.data);
+            console.log("Onboarding success:", response.data);
         } catch (error) {
             console.error("Onboarding failed:", error);
             alert(error.response?.data?.message || "Failed to save onboarding data");
         }
         const user = JSON.parse(localStorage.getItem("user"));
         try {
-            const userId = user?._id;  // ✅ use stored _id
-
             const roadmapRes = await axios.post(
-                `http://localhost:3000/user/${userId}/roadmap`,
+                `http://localhost:3000/user/roadmap`,
                 {}, // no body needed
                 {
                     headers: {
@@ -88,9 +86,8 @@ export function OnboardingFlow({ onComplete }) {
             console.log("AI Roadmap generated:", roadmapRes.data);
 
         } catch (error) {
-            res.json({
-                message: "somthing went wrong " + error
-            })
+            console.error("Roadmap generation failed:", error);
+            alert(error.response?.data?.message || "Failed to generate roadmap");
 
         }
         // Save roadmap in localStorage for frontend use
