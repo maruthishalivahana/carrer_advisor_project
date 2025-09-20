@@ -6,3 +6,4 @@ node_modules/
 config/service-account.json
 backend/config/service-account.json
 .env
+.env
