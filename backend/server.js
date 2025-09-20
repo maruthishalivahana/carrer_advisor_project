@@ -6,6 +6,8 @@ const { userdata } = require("./controllers/user.js");
 const { onBoarding } = require("./controllers/onBoarding.js")
 const { generateAIRoadmap, getUserRoadmap } = require("./controllers/roadmap.js")
 const cors = require('cors');
+const { chatbotController } = require('./controllers/chatbot.js');
+const { getCareerRecommendations } = require('./controllers/carrerRecommedation.js');
 
 
 const app = express();
@@ -37,6 +39,8 @@ app.get("/user/me", authMiddleware, userdata)
 app.post("/logout", authMiddleware, logout)
 app.post("/user/roadmap", authMiddleware, generateAIRoadmap)
 app.get('/user/roadmap', authMiddleware, getUserRoadmap)
+app.post('/user/chatbot/:id', chatbotController)
+app.post('/user/career-recommendations/me', getCareerRecommendations)
 
 
 app.post("/predict", async (req, res) => {
