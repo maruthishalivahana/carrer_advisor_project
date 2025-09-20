@@ -13,7 +13,7 @@ const { getCareerRecommendations } = require('./controllers/carrerRecommedation.
 const app = express();
 app.use(bodyParser.json());
 app.use(express.json())
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 8080
 
 app.use(cors({
     origin: "http://localhost:5173", // frontend URL

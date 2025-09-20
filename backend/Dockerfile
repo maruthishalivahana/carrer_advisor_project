@@ -1,4 +1,3 @@
-# Use official Node.js image
 FROM node:18
 
 WORKDIR /app
@@ -7,11 +6,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --production
 
-# Copy backend source code
+# Copy backend code
 COPY . .
 
-# Cloud Run sets PORT automatically
+# Cloud Run sets the port
 ENV PORT 8080
 
-# Start server
 CMD ["node", "server.js"]
