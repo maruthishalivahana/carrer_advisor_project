@@ -13,7 +13,7 @@ const { getCareerRecommendations } = require('./controllers/carrerRecommedation.
 const app = express();
 app.use(bodyParser.json());
 app.use(express.json())
-const port = 3000;
+const PORT = process.env.PORT || 3000
 
 app.use(cors({
     origin: "http://localhost:5173", // frontend URL
@@ -24,8 +24,8 @@ app.use(cors({
 
 connectDB().then(() => {
     console.log("Database connected successfully")
-    app.listen(port, () => {
-        console.log(`server running on port ${port}`)
+    app.listen(PORT, () => {
+        console.log(`server running on port ${PORT}`)
     })
 }).catch((err) => {
     console.log("Database connection failed", err)
