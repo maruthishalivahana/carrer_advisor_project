@@ -52,7 +52,7 @@ export function OnboardingFlow({ onComplete }) {
         try {
             // ✅ fetch token from storage
 
-            const response = await axios.post("http://localhost:3000/user/onboarding", {
+            const response = await axios.post("https://career-advisor-backend-46920913764.us-central1.run.app/user/onboarding", {
                 age: profile.age,
                 currentRole: profile.currentRole,
                 experience: profile.experience,
@@ -74,7 +74,7 @@ export function OnboardingFlow({ onComplete }) {
         const user = JSON.parse(localStorage.getItem("user"));
         try {
             const roadmapRes = await axios.post(
-                `http://localhost:3000/user/roadmap`,
+                `https://career-advisor-backend-46920913764.us-central1.run.app/user/roadmap`,
                 {}, // no body needed
                 {
                     headers: {

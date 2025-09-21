@@ -15,20 +15,47 @@ app.use(bodyParser.json());
 app.use(express.json())
 const PORT = process.env.PORT || 8080
 
+// app.use(cors({
+//     origin: "http://localhost:5173" || "https://carrer-advisor-project.vercel.app", // frontend URL
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     credentials: true // allow cookies/auth headers if needed
+// }));
+// CORS configuration - more flexible for production
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : [
+        "http://localhost:5173",
+        "https://carrer-advisor-project.vercel.app"
+    ];
+
 app.use(cors({
-    origin: "http://localhost:5173", // frontend URL
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true // allow cookies/auth headers if needed
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or Postman)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            return callback(null, true);
+        }
+        // In production, you might want to be more restrictive
+        if (process.env.NODE_ENV === 'production') {
+            const msg = "The CORS policy for this site does not allow access from the specified Origin.";
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true // if you're sending cookies/auth headers
 }));
 
+// Start server first, then connect to database
+app.listen(PORT, () => {
+    console.log(`server running on port ${PORT}`)
+})
 
+// Connect to database (non-blocking)
 connectDB().then(() => {
     console.log("Database connected successfully")
-    app.listen(PORT, () => {
-        console.log(`server running on port ${PORT}`)
-    })
 }).catch((err) => {
     console.log("Database connection failed", err)
+    console.log("Server will continue running without database connection")
 })
 
 /// routes
@@ -42,6 +69,10 @@ app.get('/user/roadmap', authMiddleware, getUserRoadmap)
 app.post('/user/chatbot/:id', chatbotController)
 app.post('/user/career-recommendations/me', getCareerRecommendations)
 
+// Health check endpoint for Cloud Run
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
 
 app.post("/predict", async (req, res) => {
     try {

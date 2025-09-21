@@ -38,7 +38,7 @@ export function ChatInterface({ userProgress = { level: 1 } }) {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await axios.get("http://localhost:3000/user/me", {
+                const res = await axios.get("https://career-advisor-backend-46920913764.us-central1.run.app/user/me", {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`,
                     },
@@ -99,7 +99,7 @@ export function ChatInterface({ userProgress = { level: 1 } }) {
 
         try {
             const { data } = await axios.post(
-                `http://localhost:3000/user/chatbot/${userProfile._id}`,
+                `https://career-advisor-backend-46920913764.us-central1.run.app/user/chatbot/${userProfile._id}`,
                 { message },
                 {
                     headers: {
@@ -175,8 +175,8 @@ export function ChatInterface({ userProgress = { level: 1 } }) {
                                     )}
                                     <div
                                         className={`max-w-[75%] rounded-2xl px-4 py-3 shadow ${message.type === "user"
-                                                ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white"
-                                                : "bg-white border text-gray-800"
+                                            ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white"
+                                            : "bg-white border text-gray-800"
                                             }`}
                                     >
                                         <div className="prose prose-sm max-w-none">

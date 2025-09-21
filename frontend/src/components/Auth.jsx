@@ -36,7 +36,7 @@ function Auth() {
         try {
             if (Issignup) {
                 // --- Signup API ---
-                await axios.post("http://localhost:3000/user/register", {
+                await axios.post("https://career-advisor-backend-46920913764.us-central1.run.app/user/register", {
                     fullname,
                     email,
                     password,
@@ -47,7 +47,7 @@ function Auth() {
                 setPassword("");
             } else {
                 // --- Login API ---
-                const res = await axios.post("http://localhost:3000/user/login", {
+                const res = await axios.post("https://career-advisor-backend-46920913764.us-central1.run.app/user/login", {
                     email,
                     password,
                 });

@@ -115,7 +115,7 @@ export function UserProfile({
         const fetchUser = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const res = await axios.get("http://localhost:3000/user/me", {
+                const res = await axios.get("https://career-advisor-backend-46920913764.us-central1.run.app/user/me", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const apiUser = res.data; // { fullname, onboarding: { age, currentRole, experience, interests, skills, goals, gender? } }

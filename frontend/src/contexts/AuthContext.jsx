@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5173' // change if needed
+    baseURL: 'https://career-advisor-backend-46920913764.us-central1.run.app' // Google Cloud Run backend
 });
 
 const AuthContext = createContext();
