@@ -215,7 +215,7 @@ export function LearningRoadmap({ userProfile = {}, userProgress = {}, onTaskCom
 
             {/* Overall Progress */}
             {!loading && !error && (
-                <div className="border rounded-lg shadow-sm p-4">
+                <div className="border border-gray-200 rounded-lg shadow-sm p-4">
                     <div className="flex items-center justify-between mb-3">
                         <h2 className="font-semibold">Overall Progress</h2>
                         <span className="px-2 py-1 text-xs rounded-full bg-gray-100 border">
@@ -246,7 +246,7 @@ export function LearningRoadmap({ userProfile = {}, userProgress = {}, onTaskCom
                                 <button
                                     key={week}
                                     onClick={() => setSelectedWeek(week)}
-                                    className={`p-2 rounded-lg border text-sm flex flex-col items-center ${isActive ? "border-black bg-gray-100" : "hover:bg-gray-50"
+                                    className={`p-2 rounded-lg border border-gray-300 text-sm flex flex-col items-center ${isActive ? "border-black bg-gray-100" : "hover:bg-gray-50"
                                         }`}
                                 >
                                     <span>Week {week}</span>
@@ -268,7 +268,7 @@ export function LearningRoadmap({ userProfile = {}, userProgress = {}, onTaskCom
                             selectedWeek === week && (
                                 <div
                                     key={week}
-                                    className="border rounded-lg shadow-sm p-4 space-y-4"
+                                    className="border border-gray-200 rounded-lg shadow-sm p-4 space-y-4"
                                 >
                                     <div className="flex items-center justify-between mb-2">
                                         <h3 className="flex items-center gap-2 font-semibold">
@@ -295,7 +295,7 @@ export function LearningRoadmap({ userProfile = {}, userProgress = {}, onTaskCom
                                                     initial={{ opacity: 0, y: 20 }}
                                                     animate={{ opacity: 1, y: 0 }}
                                                     transition={{ delay: index * 0.1 }}
-                                                    className={`p-4 rounded-lg border transition ${isCompleted
+                                                    className={`p-4 rounded-lg border border-gray-200 transition ${isCompleted
                                                         ? "bg-green-50 border-green-200"
                                                         : canStart
                                                             ? "hover:border-purple-300"
@@ -318,7 +318,7 @@ export function LearningRoadmap({ userProfile = {}, userProgress = {}, onTaskCom
                                                                 <div className="flex items-center gap-2 mb-1">
                                                                     <h4 className="font-medium">{task.title}</h4>
                                                                     <span
-                                                                        className={`px-2 py-0.5 rounded-full border text-xs ${getDifficultyColor(
+                                                                        className={`px-2 py-0.5 rounded-full border border-amber-50 text-xs ${getDifficultyColor(
                                                                             task.difficulty
                                                                         )}`}
                                                                     >
@@ -384,7 +384,7 @@ export function LearningRoadmap({ userProfile = {}, userProgress = {}, onTaskCom
             )}
 
             {/* Achievements */}
-            <div className="border rounded-lg shadow-sm p-4">
+            <div className="border border-amber-50 rounded-lg shadow-sm p-4">
                 <div className="flex items-center gap-2 mb-3 font-semibold">
                     <Award className="w-5 h-5" />
                     Roadmap Achievements
@@ -418,7 +418,7 @@ export function LearningRoadmap({ userProfile = {}, userProgress = {}, onTaskCom
                     ].map((a, i) => (
                         <div
                             key={i}
-                            className={`p-4 rounded-lg border text-center ${a.condition ? "bg-yellow-50 border-yellow-200" : "bg-gray-50"
+                            className={`p-4 rounded-lg border border-gray-200 text-center ${a.condition ? "bg-yellow-50 border-yellow-200" : "bg-gray-50"
                                 }`}
                         >
                             <a.icon
