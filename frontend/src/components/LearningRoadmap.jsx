@@ -68,7 +68,7 @@ export function LearningRoadmap({ userProfile = {}, userProgress = {}, onTaskCom
 
                 // 2) Perform API request with Authorization header
                 console.debug("[LearningRoadmap] Fetching roadmap for user", { userId });
-                const response = await axios.get("https://career-advisor-backend-3yvuar6t5a-uc.a.run.app/user/roadmap", {
+                const response = await axios.get("https://career-advisor-backend-46920913764.us-central1.run.app/user/roadmap", {
                     headers: { Authorization: `Bearer ${token}` },
                     timeout: 30000,
                 });

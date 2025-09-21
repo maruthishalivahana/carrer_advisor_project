@@ -38,7 +38,7 @@ export function ChatInterface({ userProgress = { level: 1 } }) {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await axios.get("https://career-advisor-backend-3yvuar6t5a-uc.a.run.app/user/me", {
+                const res = await axios.get("https://career-advisor-backend-46920913764.us-central1.run.app/user/me", {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`,
                     },
@@ -99,7 +99,7 @@ export function ChatInterface({ userProgress = { level: 1 } }) {
 
         try {
             const { data } = await axios.post(
-                `https://career-advisor-backend-3yvuar6t5a-uc.a.run.app/user/chatbot/${userProfile._id}`,
+                `https://career-advisor-backend-46920913764.us-central1.run.app/user/chatbot/${userProfile._id}`,
                 { message },
                 {
                     headers: {

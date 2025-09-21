@@ -30,7 +30,7 @@ export function Dashboard({ userProfile = {}, userProgress = {}, onTaskComplete 
             const token = localStorage.getItem("token");
 
             // Optional: call backend logout
-            await axios.post("https://career-advisor-backend-3yvuar6t5a-uc.a.run.app/logout", {}, {
+            await axios.post("https://career-advisor-backend-46920913764.us-central1.run.app/logout", {}, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 

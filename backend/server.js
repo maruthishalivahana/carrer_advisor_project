@@ -1,5 +1,4 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const connectDB = require('./config/database')
 const { register, loginUser, authMiddleware, logout } = require("./controllers/auth.js")
@@ -12,8 +11,8 @@ const { getCareerRecommendations } = require('./controllers/carrerRecommedation.
 
 
 const app = express();
-app.use(bodyParser.json());
-app.use(express.json())
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 const PORT = process.env.PORT || 8080
 
 // app.use(cors({
@@ -79,7 +78,7 @@ app.post("/logout", authMiddleware, logout)
 app.post("/user/roadmap", authMiddleware, generateAIRoadmap)
 app.get('/user/roadmap', authMiddleware, getUserRoadmap)
 app.post('/user/chatbot/:id', chatbotController)
-app.post('/user/career-recommendations/me', getCareerRecommendations)
+app.post('/user/career-recommendations/me', authMiddleware, getCareerRecommendations)
 
 // Health check endpoint for Cloud Run
 app.get('/health', (req, res) => {
