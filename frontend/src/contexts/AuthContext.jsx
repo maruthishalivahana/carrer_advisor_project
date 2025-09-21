@@ -1,9 +1,11 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL, axiosConfig } from '../config/api';
 
 const api = axios.create({
-    baseURL: 'https://career-advisor-backend-3yvuar6t5a-uc.a.run.app' // Google Cloud Run backend
+    baseURL: API_BASE_URL,
+    ...axiosConfig
 });
 
 const AuthContext = createContext();
@@ -47,15 +49,19 @@ export const AuthProvider = ({ children }) => {
     }, [token]);
 
     const login = async (email, password) => {
-        const res = await api.post('/user/login', { email, password });
-        const _token = res.data.token;
-        if (!_token) throw new Error('No token returned from login');
-        localStorage.setItem('token', _token);
-        setToken(_token);
-        // fetch /me (will happen automatically because token changed), but immediately fetch to return user
-        const me = await api.get('/user/me');
-        setUser(me.data.user || me.data);
-        return me.data.user || me.data;
+        try {
+            const res = await api.post('/user/login', { email, password });
+            const _token = res.data.token;
+            if (!_token) throw new Error('No token returned from login');
+            localStorage.setItem('token', _token);
+            setToken(_token);
+            // Set user data from login response
+            setUser(res.data.user);
+            return res.data.user;
+        } catch (error) {
+            console.error('Login error:', error);
+            throw error;
+        }
     };
 
     const logout = () => {
@@ -65,9 +71,14 @@ export const AuthProvider = ({ children }) => {
     };
 
     const signup = async (fullname, email, password) => {
-        // call register; backend returns 201 but not token typically
-        const res = await api.post('/user/register', { fullname, email, password });
-        return res.data;
+        try {
+            // call register; backend returns 201 but not token typically
+            const res = await api.post('/user/register', { fullname, email, password });
+            return res.data;
+        } catch (error) {
+            console.error('Signup error:', error);
+            throw error;
+        }
     };
 
     const updateOnboarding = async (payload) => {

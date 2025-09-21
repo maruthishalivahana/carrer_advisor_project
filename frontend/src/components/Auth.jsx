@@ -3,6 +3,7 @@ import { Sparkles } from "lucide-react";
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_ENDPOINTS, axiosConfig } from '../config/api';
 
 function Auth() {
 
@@ -36,21 +37,21 @@ function Auth() {
         try {
             if (Issignup) {
                 // --- Signup API ---
-                await axios.post("https://career-advisor-backend-3yvuar6t5a-uc.a.run.app/user/register", {
+                await axios.post(API_ENDPOINTS.REGISTER, {
                     fullname,
                     email,
                     password,
-                });
+                }, axiosConfig);
 
                 alert("Signup successful! Please login.");
                 setIsSignup(false); // switch back to login mode
                 setPassword("");
             } else {
                 // --- Login API ---
-                const res = await axios.post("https://career-advisor-backend-3yvuar6t5a-uc.a.run.app/user/login", {
+                const res = await axios.post(API_ENDPOINTS.LOGIN, {
                     email,
                     password,
-                });
+                }, axiosConfig);
 
                 // Save JWT token
                 localStorage.setItem("token", res.data.token);
@@ -63,8 +64,9 @@ function Auth() {
                 }
             }
         } catch (error) {
-            console.error(error);
-            alert(error.response?.data?.message || "Something went wrong");
+            console.error("Auth error:", error);
+            const errorMessage = error.response?.data?.message || error.message || "Something went wrong";
+            alert(errorMessage);
         }
     };
 

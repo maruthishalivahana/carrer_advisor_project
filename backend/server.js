@@ -98,6 +98,50 @@ app.get('/db-status', (req, res) => {
     res.status(200).json(dbStatus);
 });
 
+// Test database connection endpoint
+app.get('/test-db-connection', async (req, res) => {
+    try {
+        const dbStatus = {
+            connected: mongoose.connection.readyState === 1,
+            readyState: mongoose.connection.readyState,
+            host: mongoose.connection.host,
+            name: mongoose.connection.name,
+            timestamp: new Date().toISOString()
+        };
+
+        if (mongoose.connection.readyState === 1) {
+            // Test a simple database operation
+            const { User } = require('./models/user.model');
+            const userCount = await User.countDocuments();
+
+            res.status(200).json({
+                success: true,
+                message: "Database connection is working properly",
+                dbStatus,
+                userCount,
+                testQuery: "Successfully executed count query"
+            });
+        } else {
+            res.status(503).json({
+                success: false,
+                message: "Database is not connected",
+                dbStatus
+            });
+        }
+    } catch (error) {
+        console.error("Database test error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Database test failed",
+            error: error.message,
+            dbStatus: {
+                connected: mongoose.connection.readyState === 1,
+                readyState: mongoose.connection.readyState
+            }
+        });
+    }
+});
+
 app.post("/predict", async (req, res) => {
     try {
         const { input_text } = req.body;
