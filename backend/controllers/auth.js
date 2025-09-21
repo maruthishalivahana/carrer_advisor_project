@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
 const { User } = require("../models/user.model");
 const { message } = require('statuses');
 // const { authMiddleware } = ('../middlewares/auth.middleware.js')
@@ -9,43 +10,69 @@ const app = express();
 
 
 const register = async (req, res) => {
-
     try {
-
         const { fullname, email, password } = req.body;
-        const isUserRegister = await User.findOne({ email });
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds)
-        if (isUserRegister) {
-            res.status(400).json({
-                message: "user already exits !"
 
-            })
+        // Check if database is connected
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({
+                message: "Database connection not available. Please try again later."
+            });
+        }
+
+        const isUserRegister = await User.findOne({ email }).maxTimeMS(5000);
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        if (isUserRegister) {
+            return res.status(400).json({
+                message: "User already exists!"
+            });
         } else {
             const newUser = new User({
                 fullname,
                 email,
                 password: hashedPassword
-            })
+            });
             await newUser.save();
             res.status(201).json({
-                message: "user created sucessfully please login!"
-            })
+                message: "User created successfully! Please login."
+            });
         }
 
     } catch (error) {
-        res.status(400).json({
-            message: "something went wrong " + error.message
-        })
+        console.error("Registration error:", error);
 
+        if (error.name === 'MongoServerError' && error.code === 11000) {
+            return res.status(400).json({
+                message: "User with this email already exists!"
+            });
+        }
+
+        if (error.name === 'MongoTimeoutError') {
+            return res.status(503).json({
+                message: "Database connection timeout. Please try again."
+            });
+        }
+
+        res.status(500).json({
+            message: "Registration failed. Please try again later."
+        });
     }
 }
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // Check if database is connected
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({
+                message: "Database connection not available. Please try again later."
+            });
+        }
+
         // Check if user exists
-        const isUserRegister = await User.findOne({ email }).select("+password");
+        const isUserRegister = await User.findOne({ email }).select("+password").maxTimeMS(5000);
         if (!isUserRegister) {
             return res.status(400).json({
                 message: "User not found. Please register first!"
@@ -79,9 +106,16 @@ const loginUser = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error("Login error:", error);
+
+        if (error.name === 'MongoTimeoutError') {
+            return res.status(503).json({
+                message: "Database connection timeout. Please try again."
+            });
+        }
+
         res.status(500).json({
-            message: "Server error",
-            error: error.message
+            message: "Login failed. Please try again later."
         });
     }
 };

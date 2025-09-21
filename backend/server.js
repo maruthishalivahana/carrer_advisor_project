@@ -45,18 +45,29 @@ app.use(cors({
     credentials: true // if you're sending cookies/auth headers
 }));
 
-// Start server first, then connect to database
-app.listen(PORT, () => {
-    console.log(`server running on port ${PORT}`)
-})
+// Connect to database first, then start server
+async function startServer() {
+    try {
+        // Try to connect to database first
+        await connectDB();
+        console.log("Database connected successfully");
+    } catch (err) {
+        console.log("Database connection failed", err);
+        console.log("Server will continue running without database connection");
+    }
 
-// Connect to database (non-blocking)
-connectDB().then(() => {
-    console.log("Database connected successfully")
-}).catch((err) => {
-    console.log("Database connection failed", err)
-    console.log("Server will continue running without database connection")
-})
+    // Start the server
+    app.listen(PORT, () => {
+        console.log(`server running on port ${PORT}`);
+        console.log(`Health check available at: http://localhost:${PORT}/health`);
+    });
+}
+
+// Start the application
+startServer().catch((err) => {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+});
 
 /// routes
 app.post("/user/register", register);

@@ -36,7 +36,7 @@ function Auth() {
         try {
             if (Issignup) {
                 // --- Signup API ---
-                await axios.post("https://career-advisor-backend-46920913764.us-central1.run.app/user/register", {
+                await axios.post("https://career-advisor-backend-3yvuar6t5a-uc.a.run.app/user/register", {
                     fullname,
                     email,
                     password,
@@ -47,7 +47,7 @@ function Auth() {
                 setPassword("");
             } else {
                 // --- Login API ---
-                const res = await axios.post("https://career-advisor-backend-46920913764.us-central1.run.app/user/login", {
+                const res = await axios.post("https://career-advisor-backend-3yvuar6t5a-uc.a.run.app/user/login", {
                     email,
                     password,
                 });
