@@ -106,7 +106,16 @@ export function Dashboard({ userProfile = {}, userProgress = {}, onTaskComplete 
             {/* <Navigation currentScreen="dashboard" userProgress={userProgress} /> */}
             <div className="flex items-center flex-row gap-4">
                 <Navigation />
-                <button className="  mt-10 cursor-pointer border p-4 rounded-2xl" onClick={handleLogout}>logout</button>
+                <div className="flex justify-end mt-10">
+                    <button
+                        onClick={handleLogout}
+                        className="px-6 py-3 rounded-xl bg-red-500 text-white font-medium shadow-md hover:bg-red-600 hover:shadow-lg transition-all duration-300 ease-in-out active:scale-95"
+                    >
+                        Logout
+                    </button>
+                </div>
+
+
             </div>
             <div className="max-w-6xl mx-auto p-6 space-y-6">
                 {/* Welcome Header */}
