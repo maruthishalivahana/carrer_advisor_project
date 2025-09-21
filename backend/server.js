@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 const connectDB = require('./config/database')
 const { register, loginUser, authMiddleware, logout } = require("./controllers/auth.js")
 const { userdata } = require("./controllers/user.js");
@@ -83,6 +84,18 @@ app.post('/user/career-recommendations/me', getCareerRecommendations)
 // Health check endpoint for Cloud Run
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Database status endpoint
+app.get('/db-status', (req, res) => {
+    const dbStatus = {
+        connected: mongoose.connection.readyState === 1,
+        readyState: mongoose.connection.readyState,
+        host: mongoose.connection.host,
+        name: mongoose.connection.name,
+        timestamp: new Date().toISOString()
+    };
+    res.status(200).json(dbStatus);
 });
 
 app.post("/predict", async (req, res) => {
